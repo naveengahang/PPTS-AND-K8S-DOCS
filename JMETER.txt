@@ -1,0 +1,54 @@
+step1:java installation in your local system
+step2:search in google jmeter(apachi) download 
+step3: unzip downloaded jmeter folder and keep it in your any local drive E or....
+step4:start Jmeter
+(in windows-jmeter/bin-jmeter.bat (click that jmeter.bat it will start)
+-------------------------------------------------------------------------------
+
+Test plan- it's like a container,here test all the elements to test(like:thread group,leaserners,...)
+WorkBench- here you can keep your elements for temporary basis(workbench is not safe,if you want be safe you can keep in testplan)
+ 
+How to create first jmeter:
+step1:start jmeter
+step2:create a testplan
+step3:create a thread group(users)
+step4:add a sampler(http)
+step5:add listeners(for view results in table ,or view results tree)
+step6:to run the test
+
+---------------------------
+
+Assertion results:
+Response assertion
+Assertion= to check on the response
+
+-users->Assertions->response assersion(commonly use)
+-Response assertion
+
+-----------------------
+-Duration Assertion: give a some seconds (2000mili seconds) and check the response is it passed or not ,if
+---------
+-Size assertion: basically for size(you can give like a =,>=,<=,....something )
+-Add->Assertion->size assertion
+-------
+HTML Assertion
+-Add->Assertion->HTML Assertion
+at this point you can give error threshold and worning threshold (like error threshold-38, worning threshold-110)
+if you want to save some errors you can browse location select .txt file and save it ...so after run you will get all errors
+So Jmeter provides us this way to check out XML,HTML and so on
+----
+XML Assertion
+-Add->Assertion->XML Assertion
+
+----
+XPath Assertion
+-Add->Assertion->XPath Assertion
+(this is will mostly be used in API testing so we'll be having a dam on API) 
+---------------
+Listeners:
+Listeners are the elements of jmeter which gather the info about the test
+and used to view results/metrics of the test 
+-Add->Listeners->view results in table 
+-Add->Listeners->view results in tree
+-Add->Listeners->Aggregate Report    --------this will give a single line report of listeners elements
+-Add->Listeners->graph result                         ----you can check graph result also

@@ -1,0 +1,29 @@
+SSH -22
+HTTP-80
+HTTPS-443
+JENKINS-8080
+TOMCAT-8080
+RDS(WINDOWS)-3389
+MYSQL-3306
+DNS-53
+FTP-20 AND 21
+BGP-179
+ldap-389
+
+------------------
+Kubernetes pod(container) to local machine 
+#kubectl cp podname-id:directory_path local_machine_path
+#kubectl cp jmeter-6bfcbc95f8-ln8lx:/opt/apache-jmeter-5.5/bin/examples/ ./jmeter_files/
+
+
+Local machine to kubenetes pod
+#kubectl cp local_machine_path podname_id:directory_path
+#kubectl cp ./jmeter_files/file1.txt jmeter-6bfcbc95f8-ln8lx:/opt/apache-jmeter-5.5/bin/examples/
+
+
+---------------------------------------------------------------------
+1)create a ssh key pair -#ssh-keygen  ----key will be generated
+2)opened publick keycopy----and paste at bitbucket-persnal settings-ssh keys (paste the key)
+connection will be estblish(you can clone the repository using ssh)
+open bitbucket-->go to profile account
+

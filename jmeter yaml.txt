@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: jmeter-server
+  namespace: naveen
+spec:
+  containers:
+  - name: jmeter-server
+    image: justb4/jmeter:5.4
+    ports:
+    - containerPort: 1099
+      name: jmeter-server
+    - containerPort: 60000
+      name: jmeter-server-debug
+  restartPolicy: Never
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: jmeter-client
+  namespace: naveen
+spec:
+  containers:
+  - name: jmeter-client
+    image: justb4/jmeter:5.4
+    command:
+    - sh
+    - -c
+    - "jmeter -n -t /jmeter/tests/test.jmx -l /jmeter/tests/test.jtl"
+    volumeMounts:
+    - name: tests
+      mountPath: /jmeter/tests
+  volumes:
+  - name: tests
+    emptyDir: {}
+  restartPolicy: Never

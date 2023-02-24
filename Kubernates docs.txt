@@ -1,0 +1,1117 @@
+Kubernetes is a open source and Archistration tool
+-High availability,load balancing,networking....etc
+
+Note:kubectl is command line tool (-kubectl is to communicate with cluster)
+kubeadm-is to build clusters 
+-------------------------------------------------------------------------
+-communication between two cluster by using service we can communicate (do)
+-
+
+---------------------------------------------------------------------------------------------------------------
+HOW MANY CLUSTERS DO YOU HAVE IN YOUR LOCAL OR YOUR WORKING ENVIRONMENT TO CHECK COMMAND BELOW:
+#kubectl config get-contexts       ----------By this command you can find how many cluster are in your location or your local
+ 
+----------------------------------------------------------------------------------------------------------------
+YOU CAN SWICH CURRENT CLUSTER TO ANOTHER CLUSTER -BY using below command
+#kubectl config use-context docker-desktop  (#kubectl config use-context clustername)    ---------you can switch current kubernetes cluster to another cluster
+
+----------------------------------------------------------------------------------------
+YOU CAN CHECK IN WHICH CLUSTER YOUR IN PRESENT
+
+#kubectl config current-context           ----by this command you can check present which cluster your there
+
+--------------------------------------------------------------------------------------------
+TO ENTER INTO A PERTICULAR POD CONTAINER
+#kubectl exec -it pod/jmeter-6bfcbc95f8-ln8lx -c jmeter -- sh      (#kubectl exec -it podname -c containername --sh)   -------by this command we can do a ssh of perticular pod of container
+
+----------------------------------------------------------------------------------------------------------
+BY BELOW COMMANDS ARE YOU AUTHARIZESD CANDIDATE OR NOT IT WILL TELL YOU
+#kubectl auth can-i create pods 
+yes
+#kubectl auth can-i create deployments
+yes
+#kubectl auth can-i create --as naveen    ----------here as a naveen user can not access cluster
+NO
+
+#kubectl auth can-i create pods --namespace apps
+yes
+#kubectl auth can-i create pods --as naveen namespace apps
+NO 
+----------------------------------------------------------------------
+
+
+YOUTUBE LINK: https://www.youtube.com/watch?v=j4I-YmfWPGc
+Kubernetes
+Kubernetes Pods Explained with Examples | Kubernetes Pod for Beginners | Kubernetes Tutorial
+-----------------------------------------------------------------------------------------------------------------
+POD:is a basic unit of deployment
+-And a pod can have any number of containers running it
+-A pod is basically a wrapper around(combination of containers)with containers running on a node
+-Containers in a pod have shared volumes,Linux namespaces, and cgroups
+-Each pod has a unique IP Address and the port space is shared by all the containers in that pod.This means that 
+diffenent containers inside a pod can communicate with each other using their corresponding ports on localhost
+
+Note:when pod get restart IP will change automatically
+-you can save yaml file with any relawent name of pod so it can easy to find yaml file which pods one it is(it's not mandatory yaml file name and pod name should be same it may be different) 
+-----------------------------------
+Sample pod ymal script:
+
+kind: Pod
+apiVersion: v1
+metadata:
+  name: pod-1
+spec:
+  containers:
+  - name: container-1
+    image: nginx
+-----------------------------------------
+You can check how many nodes there by using below command
+#kubectl get nodes
+
+Command to create a pod:
+#kubectl create -f pod-singlecontainer.yaml (kubectl create -f pod-podname.yaml)
+#kubectl get pods
+
+(Note:if in same yaml file you did any changes then you can run this command #kubectl apply -f pod-singlecontainer.yaml)
+
+To check full pod information
+#kubectl get pods -o wide
+
+By Below command you can check which pod is connected with which name space(by default namespace should be defalt nameonly)
+#kubectl describe pod podname
+
+Namespace:Kubernetes supports namespaces to create multiplr virtual clusters within the same physical cluster
+
+Why we use namespaces?
+when we have only one cluster and different teams are using that. In that case it would be greate if every team create their 
+resources in their own namespaces.
+
+we want to separate the environment like dev,stage in different namespaces
+create a pod in different namespaces
+Note:If every team will create their own namespaces it's good because no one will disturb your namespace so you can do your job in 
+in your own way
+it's good practice to create different namespace 
+
+To check namespace command:
+# kubectl get namespace
+(some other namespace also shows you that will come when your creating a cluster that time will generate some namespace)
+
+To Create New namespace command:(by below command you will create new namespace with new pod)
+#kubectl namespace-name create -f pod-podname.yaml
+
+(if you do with #kubectl get pods ,you will find default namespace pods only, you won't get perticular namespace pods)
+so if you want inside of namespace pods then you should run below command
+#kubectl get pod --namespace anyname   (#kubectl get pod --namespace test1)
+-----------------------------------------------------------
+In the yaml file we will define which namespace to use while creating a pod(in meta data we mentioned namespace:with name)
+Example:
+kind: Pod
+apiVersion: v1
+metadata:
+  name: pod-1
+  namespace: kube-public
+spec:
+  containers:
+  - name: container-1
+    image: nginx
+----------------------------------------------------------------------
+You can create and verify a pod is it created or not by using command
+
+#kubectl create -f pod-namespacesinglecontainer.yaml    ---(here we are creating a pod we mentioned namespace in yaml script)
+
+If you want to check pods in perticular namespace you can check by below command
+
+#kubectl get pod --namespace nametest1
+
+If you want to change namespace default one to some other namespace you can do by using config command below mentioned FYI,
+#kubectl config set-contesx --current --namespace test2    ---(you can give any name)
+
+for confirmation you can check all pods are change it in to cuurent name space or not or(use kubectl get pods)
+#kubectl get pod --namespace test2
+
+-Basicaly Pod can run the container here below you can see POD Running a Container
+In this yaml file we are providing the configuration for a container with command as shown below:(in yaml mentioned ubuntu is image inside of ubuntu we mentioned some commands)
+Finename:-you can mention anythig.yaml(containerwithcomand.yaml)
+------------------
+kind: Pod
+apiVersion: v1
+metadata:
+  name: command-pod
+spec:
+  containers:
+  - name: container-with-command
+image: ubuntu
+    command:
+    - /bin/bash
+    - -ec
+    - while :; do echo '.'; sleep 5; done
+------------------------------------------------
+creating a new pod with running containerwithcomand.yaml file---command is beleow fyi,
+#kubectl create -f pod-containerwithcomand.yaml         ----by this command pod is created
+#kubectl get pods            ------you can check pod(command-pod) is showing or not
+And if you want to check logs of pod you can run the command below one
+#kubectl logs command-pod -f    
+-
+-
+-(something you will get logs present which is running)
+
+
+-Here we are creating a nginx image inside of one container to exposing the port 80(this means we are creating one pod for nginx image)
+-In this yaml file we are using a nginx image and exposing it on the port 80
+--------------------------------------------
+kind: Pod
+apiVersion: v1
+metadata:
+  name: pod-exposed-port
+spec:
+  containers:
+  - name: container-exposed-port
+    image: nginx
+    ports:
+      - containerPort: 80
+--------------------------------------------
+-------------------------------------------------------------------
+Note:In metadata spot we can mention all related cluster information like:pod name,name-space name or name: readiness-probe,name: liveness-probe......etc
+
+
+-------------------------------------------------------------------------------------
+create the pod
+
+#kubectl create -f pod-expose-pod.yaml          -------(This pod should create a container and expose it on port 80)
+Now we will use the port-forward to expose this port to the localhost or you can define the another port 
+also using the second command
+#kubectl port-forward pod-exposed-port 80    --------(you can check you will get response from port80.....)
+
+This below command if you want to use for different port to use or if not also fine
+#kubectl port-forward pod-exposed-port 8000:80
+
+-Now you can access the url in browser
+http://localhost   (by this url you can find well come to nginx response----means getting success)
+
+http://localhost:8000   (By using this also you can check by acording to given port in yaml---you will get respose aswell)
+
+-By giving required resources you run you can create a pod with container (Pod Running a Container with Resource Requirements)
+Memory requirement for our container:
+Minimum Memory — 64MB 
+
+Maximum Memory- 128MB
+If the container tries to allocate more than 128 MB of memory, it will be killed with a status of OOMKilled(thorging error)
+
+CPU Requirement for our container
+Minimum CPU— 0.5
+
+Maximum CPU- 1
+The minimum CPU requirement for CPU is 0.5 (which can also be understood as 500 milli-CPUs and can be written as 500m instead of 0.5) and 
+the container will only be allowed to use a maximum of 1 CPU unit.
+
+below writing a yaml file(pod name:pod-resources)
+------------------------------------------
+kind: Pod
+apiVersion: v1
+metadata:
+  name: pod-resources
+spec:
+  containers:
+  - name: container-resource-requirements
+    image: nginx
+    resources:
+      limits:
+        memory: "128M"
+        cpu: "1"
+      requests:
+        memory: "64M"
+        cpu: "0.5"
+-----------------------------------------
+
+Create the pod
+#kubectl create -f pod-with-resources.yaml   ------(pod name any name you can give )
+
+Describe the pod
+#kubectl describe pod-resources           -----------(you can check all info like limits:cpu and memory info....)
+
+For Example we are given only memory: "128M" cpu: "1"  but we given more memory and cpu behide this what will happen
+we can see now:It will get worning and that pod won't be create properly and automatically it will delete
+-In this yaml file we are using resources which are not available in our cluster nodes.(Pod with Resource Requests That Can’t Be Met by Any of the Nodes)
+--------------------
+kind: Pod
+apiVersion: v1
+metadata:
+  name: pod-huge-resources
+spec:
+  containers:
+  - name: container-resource-requirements
+    image: nginx
+    resources:
+      limits:
+        memory: "128G"
+        cpu: "1000"
+      requests:
+        memory: "64G"
+        cpu: "500"
+-----------------------------------------------------------
+Create a pod
+#kubectl create -f pod-with-huge-resources.yaml        ------pod is created
+#kubectl describe pod pod-huge-resources                       --------you can check all info and in down of info you will get one error also
+(i.e warning failed sheduling-insuffecinet memory and cpu)
+
+Pod with Multiple Containers Running inside It
+-In this yaml file you can see that we are creating two container inside a pod
+-------------------------------------------
+kind: Pod
+apiVersion: v1
+metadata:
+  name: multi-container
+spec:
+  containers:
+  - name: container-1
+    image: nginx
+  - name: container-2
+    image: ubuntu
+    command:
+    - /bin/bash
+    - -ec
+    - while :; do echo '.'; sleep 5; done
+--------------------------------------------------------
+
+To create multi containers and info check commands below
+Create a Pod
+#kubectl create -f pod-multi-container.yaml             -----------------creating a pod with multi container
+#kubectl describe pod multi-container              -------------by this command you can check multi containerse created or not
+
+We can specify the container name to get the logs for a particular container running in a pod, as shown here:(if we want to check individual container info or logs by giving commands)
+#kubectl logs multi-container container-2  (#kubectl logs podname containername)
+#kubectl logs multi-container container-1  (#kubectl logs podname containername)
+
+Pod Lifecycle
+Pods has different States as described below:
+
+Pending: This means that the pod has been submitted to the cluster, but the controller hasn’t created all its containers yet. 
+It may be downloading images or waiting for the pod to be scheduled on one of the cluster nodes.
+
+Running: This state means that the pod has been assigned to one of the cluster nodes and at least one of the containers is either
+running or is in the process of starting up.
+
+Succeeded: This state means that the pod has run, and all of its containers have been terminated with success.
+
+Failed: This state means the pod has run and at least one of the containers has terminated with a non-zero exit code, 
+that is, it has failed to execute its commands.
+
+Unknown: This means that the state of the pod could not be found. This may be because of the inability of the controller to connect
+with the node that the pod was assigned to.
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+https://www.youtube.com/watch?v=koSCPUlzkgM
+https://devops4solutions.com/kubernetes-pods-health-check-using-liveness-and-readiness/             -------document of readiness and liveness
+
+Kubernetes Pods Health Check using Liveness and Readiness
+-In this blog, we will explore how to check the health of the Kubernetes pods using Liveness and Readiness Probe.
+
+Agenda:
+What is Probes/Health Check
+Pod with a Liveness Probe and No Restart Policy
+Creating a Pod Running a Container with a Liveness Probe and a Restart Policy
+Creating a Pod Running a Container with a Readiness Probe
+
+-Probes/Health Checks
+It can be configured to check the health of the containers running in a pod.
+used to determine whether a container is running or ready to receive requests
+
+A probe/health check may return the following results:
+Success: The container passed the health check.
+
+Failure: The container failed the health check.
+
+Unknown: The health check failed for unknown reasons.
+
+Types of Probes:
+Liveness Probe-
+ used to determine whether a particular container is running or not.
+If a container fails the liveness probe, the controller will try to restart the pod on the same node according to the restart policy configured in the yaml dile for the pod.
+
+Restart Policy-
+We can define(in yaml file) the restart Policy in the pod to instruct the controller about the conditions required to restart the Pod
+
+Default value is- always 
+
+Values for the- Restart Policy  as follows
+
+Always: Always restart the pod when it terminates.
+OnFailure: Restart the pod only when it terminates with failure.
+Never: Never restart the pod after it terminates.
+
+Pod with a Liveness Probe and No Restart Policy
+In this yaml file we will define the Liveness Probe and no restart Policy.
+
+If we don’t specify the restart Policy then by default it is always 
+------------------------------------------------------------
+kind: Pod
+apiVersion: v1
+metadata:
+  name: liveness-probe
+spec:
+  containers:
+  - name: ubuntu-container
+    image: ubuntu
+    command:
+        - /bin/bash
+        - -ec
+        - touch /tmp/live; sleep 30; rm /tmp/live; sleep 600
+    livenessProbe:
+       exec:
+         command:
+            - cat
+            - /tmp/live
+       initialDelaySeconds: 5
+       periodSeconds: 5
+----------------------------------------------------------------------------------------------
+Pod configuration -Above yaml file explained little info below
+
+Creating a container with ubuntu image
+When container starts it will create a file /tmp/live then sleep for 30 seconds and at last remove the file /tmp/live 
+This means the file will be available only for 30 seconds and after that it is no longer available in the container
+In liveness configuration — It will try to find the file every 5 seconds with an initial delay of 5 seconds
+initalDelaySeonds : Number of seconds controller will wait before launching the probe
+
+periodSeconds : Number of seconds after which the probe will be repeated periodically
+
+Create a pod:
+#kubectl create -f liveness-probe.yaml         ------------creating a pod by using yaml file
+#kubectl describe pod liveness-probe          -------------you can check all info byusing describe command   
+
+You will see the liveness-probe is succeed because the command is executed successfully
+
+Now wait for 30 seconds and the run the below command
+
+#kubectl describe pod liveness-probe    -----------now you can check by this command pod is liveness working or healthy or unhealthy
+
+sometimes pod will restart again and again(Now you can see that container is restarting again and again because of the default Restart policy)
+
+
+-Creating a Pod Running a Container with a Liveness Probe and a Restart Policy
+Now we will use the same pod configuration but with Restart policy as Never
+--------------------------------------------------------------------------------------
+kind: Pod
+apiVersion: v1
+metadata:
+  name: liveness-probe-never-restart
+spec:
+  restartPolicy: Never
+  containers:
+  - name: ubuntu-container
+    image: ubuntu
+    command:
+        - /bin/bash
+        - -ec
+        - touch /tmp/live; sleep 30; rm /tmp/live; sleep 100
+    livenessProbe:
+       exec:
+         command:
+            - cat
+            - /tmp/live
+       initialDelaySeconds: 5
+       periodSeconds: 5
+-------------------------------------------------------------------------
+Create a pod:
+#kubectl create -f liveness-probe-with-restart-policy.yam               -----------------above writen as a restart policy in yaml file
+
+-Wait for a minute and then run the below command
+
+#kubectl describe pod liveness-probe-never-restart                             ------------Now you can check liveness
+(From the output you can see that controller killed the container and never attempted to restart the Pod)
+-----------
+
+Readiness Probe:
+-used to determine whether a particular container is ready to receive requests or not.
+For ex- A container which serving a web-application, readiness mean that container has loaded all the static assets, database connection, 
+started the webserver and opened a port to start serving request
+
+-What happen if container fails its readiness probe ?
+Kubernetes controller will ensure that the pod doesn’t receive any requests.
+
+Readiness Probe States:
+
+Failure — is the default state until the readiness probe succeeds. 
+
+Success- The container will start receiving requests only after the readiness probe returns with the Success state.
+
+(If no readiness probe is configured, the container will start receiving requests as soon as it starts.)
+
+-Creating a Pod Running a Container with a Readiness Probe:
+In this yaml file we will define the Readiness Probe
+----------------------------------------------------------------------- 
+kind: Pod
+apiVersion: v1
+metadata:
+  name: readiness-probe
+spec:
+  containers:
+  - name: ubuntu-container
+    image: ubuntu
+    command:
+        - /bin/bash
+        - -ec
+        - sleep 30; touch /tmp/ready; sleep 600
+    readinessProbe:
+       exec:
+         command:
+            - cat
+            - /tmp/ready
+       initialDelaySeconds: 10
+       periodSeconds: 5 
+--------------------------------------------------------------------------------
+Pod configuration above one is explained
+
+Creating a container with ubuntu image
+When container starts it will sleep for 30 seconds and then create file /tmp/ready
+This means the file will be available only after 30 seconds
+In readiness configuration — It will try to find the file every 5 seconds with an initial delay of 10 seconds
+
+Create a pod commands:
+
+#kubectl create -f readiness-probe.yaml
+#kubectl get pod readiness-probe
+#kubectl describe pod readiness-probe
+
+(After command-Wait for a minute and then run the below command)
+#kubectl describe pod readiness-probe
+
+Best Practices while using Probes:
+-Liveness Probes:
+
+initialDelaySeconds : should be more then the application start up time so that container doesn’t get stuck in a restart Loop
+
+-Readiness Probes:
+
+initialDelaySeconds : could be small because we want to enable the traffic to the pod as soon as container is ready
+
+
+---------------------------------------------------------------------------------------------------------------------------
+
+DEPLOYMENT DRAWING
+
+POD--------->DEPLOYMENT.YAML(by yaml only pods will create)----------------->SERVICE(by giving lables)
+
+
+  Service
+    ^
+    |---------->lables
+ Deployment.yaml
+    ^
+    |
+   POD
+
+-----------------------
+STATEFULSET
+-in statefulset pods name will won't change means which you are given specific name that name only shown you (when you delete the pod,pod name won't change )
+
+Note:In deployment when pod deleted then pod name also changed when it comes automatically create new pod(this is the difference between statefulset and deployement)
+
+Perminately statefulset delete command:
+#kubectl delete statefulset podname               -----------by this command statefulset pods step by step delete 
+----------------------------------------------------------------------------------------------------------------------------------
+
+INGRESS
+
+-to explore http and https ---purpose we can use ingress
+-where you exposes your sevices that's a ingress
+
+---Traffic----Ingress controller------------services--------deploying pods
+
+Note:this ingress will availble at network location in lens(kubernetes)
+Note:In market we have a two diffrent types of ingrees are available-1)ingress-nginx,2)kubelet-ingress
+majarly use case are ingress-nginx only
+Note:in cloud basically loadbalence by defalt available(by default in cloud ingress controller will be available)
+
+-----
+NODE PORT:means with in cluster you can explore with some local clusterip(pode ip) and with port no(ex:192.168.2.4:34216) in your browser 
+-------------------------------
+Note:every pod have one ip,if inside of pod 2 or 3 containers are there for that container also use same pod ip only(there is no ip for containers).
+
+Note1:first you should create a pv(persistent volume) and then you can create pvc(persistent volume claim). pvc will take a space from pv(for example we create a pv with 4GB,then you can create a pvc of 2GB, so that 2gb is taking from pv only).
+Note2:All pods you should create in deployment only because in deployment.yaml file will support if you delete bymistake perticular pod it won't delete. if you create normal pod if want to delete that pod it will delete directly no more backwill available for that.so it's better to practice create a pod in deployment
+Note3:Mostly events will generate if any errors will come then events will generate(this events you can check inside of pvc,pv,pods,containers)
+Note4:What is the API-api is nothing but to provide a service(or resources(resources is nothing but pods,nodes,containers..etc)) to end user---(resources--------api----->end user or client)(In kubernetes yaml file we must be mentioned apiversion to communicate end user)
+-by default in kubernetes api server is available from there only we can select acroding to required api.
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+**
+#kubectl config current-context            ----------------------This is very importent command to check which cluster we are(where we are it will give us-which cluster we connect right now)
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+API
+
+-in kubernetes basically if you want access the api server for that you need a security i.e-TLS(transport layer security)(In TLS have some certificates like public certificate or private certificate or CA-authority(authrization certificate) will available you can take any one and use for security purpose)
+-in kubernates no need for tls certificate-because kube-proxy is available to access api(this kube-proxy you can download by doing curl....something ),Backend kubeproxy will discuss or communicate with tls certificates.
+-Whatever resources(like:pods,deployments..etc) are avaible to end user or client it's called API'S
+-Every api's have a status and versions will be available(like:apiversion:vi,apiversion/app....etc)
+-Basically in kubernetes have a api server- from that server only we get alll api versions and status 
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Azure secrete Key:
+
+V5S7Q~tza3H-0Xpyng4UrQ4FXLaYg-vUXSAXt
+---------------------------------------------------------------------------------------------------------------------------
+Linux command
+:e!      ----------------if any changed in file then need to be back as usal normal file then use this command
+
+
+git commit -m "SAS PRA INFRA BASELINE"            ------------git
+
+E:\SAS\sas-aws-infrastructure>git commit -m "SAS PRA INFRA BASELINE"
+Author identity unknown
+
+*** Please tell me who you are.
+
+Run
+
+  git config --global user.email "you@example.com"
+  git config --global user.name "Your Name"
+
+to set your account's default identity.
+Omit --global to set the identity only in this repository.
+
+fatal: unable to auto-detect email address (got 'Naveen Kumar@BCSIN-LPA-0095.(none)')
+
+E:\SAS\sas-aws-infrastructure>git config --global user.email "naveen.kumar@bcstechnology.com.au"
+
+E:\SAS\sas-aws-infrastructure> git config --global user.name "Naveen"
+
+E:\SAS\sas-aws-infrastructure>git commit -m "SAS PRA INFRA BASELINE"
+[feature/dev 77ddd3c] SAS PRA INFRA BASELINE
+ 7 files changed, 292 insertions(+), 151 deletions(-)
+ create mode 100644 backend.tf
+ create mode 100644 variables.tfvars
+
+E:\SAS\sas-aws-infrastructure>git push
+Enumerating objects: 15, done.
+Counting objects: 100% (15/15), done.
+Delta compression using up to 4 threads
+Compressing objects: 100% (8/8), done.
+Writing objects: 100% (9/9), 3.00 KiB | 1.50 MiB/s, done.
+Total 9 (delta 6), reused 2 (delta 1), pack-reused 0
+remote:
+remote: Create pull request for feature/dev:
+remote:   https://bitbucket.org/bcstechnology/sas-aws-infrastructure/pull-requests/new?source=feature/dev&t=1
+remote:
+To https://bitbucket.org/bcstechnology/sas-aws-infrastructure.git
+   05e431d..77ddd3c  feature/dev -> feature/dev
+
+E:\SAS\sas-aws-infrastructure>
+
+Cloud watchlink
+Install EKSCTL: https://docs.aws.amazon.com/eks/lates...
+Install KUBECTL: https://docs.aws.amazon.com/eks/lates...
+Use EKSCTL to create EKS Cluster: https://docs.aws.amazon.com/eks/lates...
+Deploy Container Insight: https://docs.aws.amazon.com/AmazonClo...
+Connect with me in LinkedIN: https://www.linkedin.com/in/rajdeep-s...
+Definitely do NOT Click: https://youtube.com/channel/UCBdfli20...
+https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html
+
+
+Install kubectl
+  -curl -o kubectl.exe https://amazon-eks.s3.us-west-2.amazonaws.com/1.21.2/2021-07-05/bin/windows/amd64/kubectl.exe  -----------this is kubectl configuration command
+
+https://docs.aws.amazon.com/eks/latest/userguide/eksctl.html  -----------this is configuration of eks and install of eks by using chaco below commands
+Install eksctl
+choco install -y eksctl 
+choco upgrade -y eksctl 
+eksctl version
+----------------------------
+choco install kubernetes-helm    ------------------helm istall command
+choco install kustomize   
+------------------------------------
+
+KUBECTL Commands
+aws configure -----------once configure this you will connect to aws console account- get other kubectl commands
+kubectl get svc   -----------this is shows the cluster ip and port
+kubectl get nodes    --------- you will get nodes which is created in cluster
+kubectl get node -o wide    ----------you will get node configuration
+kubectl get node -o wide --show-lables   ----------you will get labes like instance size-(like t3 micro,...)
+kubectl create ns sasproject    -----------create a namespace(like any -sasprject,naveen.....)
+kubectl get namespaces   ---------namespces for workernods
+kubectl get pvc -n naveen  ------------you can check name space pvc (pod)
+kubectl get pv   ------------------you will get pv status
+vi kibana-configuration.yaml   ----------first create a one yaml file and then apply below mentioned command(kubectl apply -f kibana-configuration.yaml)
+Note:if we need to create pod ,then yaml file is importent with out yaml we can't create a pod
+kubectl apply -f kibana-configuration.yaml     ------------to run yaml file need to apply then only yaml will work
+kubectl describe pod naveen-6db9r72e7 -n kibananamespce   --------------------------here pulling immage of pod
+kubectl get svc -n naveennamespace  ------------you will get by this coomand how many sevices are available or working
+kubectl logs -f kibana-6db7683ea-76pmd -n naveennamespace    ---------------------you can check loggs of perticular pod
+vi fluentd-config.yaml    -----------create fluent config yaml file and apply by using below command
+kubectl create -f fluentd-config.yaml    so it's created( in this yaml file-fluentd created,cluster role,clusterrolebinding and daemonset created)
+vi sample-pod.yaml  ---------creating pod with yaml script
+kubectl create -f vi sample-pod.yaml     ------------pod created
+kubectl logs -f testpod   --------------you get loggs of testpod 
+kubectl get pod -n cert-manager  -------------to get particular pod-need to give name of pod
+kubectl get pod -n sasoperator  ------------------to get particular pod-need to give name of pod
+nano sas-pra.yaml --------file created then need to run kubectl apply -f sas-pra.yaml cmmand
+kubectl apply -f sas-pra.yaml -------------(kubectl apply -f name.yaml)
+kubectl get rs    --------------to check replicasets(rs is nothing but replicaset)
+kubectl delete pods --all  ----------it will delete but again will create automatically because backend replicaset is working
+kubectl delete rs nginxfrontend  ------------specific name replicaset will we can delete
+kubectl get pods ------- to check pods
+kubectl create -f daemonset.yml  ----------daemonset created
+kubectl get pods -o wide  ------------we check detail info of pods
+kubectl describe pod podname     -------------------here you will get all info of perticular pod details like ip and container name etc...
+kubectl exec -it podname -c containername  /bin/sh    ------------by this command you will enter inside of container 
+kubectl get pvc            ------------you will get pvc(persistence volume claim)
+kubectl describe pvc pvcname              ----------you can check pvc all information
+kubectl get pv          ----------------you will get pv
+kubectl describe pv pvname     ------------you can check inside of pv information
+kubectl delete ds (podname)     ------------(ds-nothing but deamonset)perticular deamonset delete
+kubectl frt 
+kubectl cluster-info    -----------------get cluster info
+kubectl delete -f nginx-deployment.yaml   ----------------delete command of yaml script
+
+kubectl get node -A -o wide    --------------to check wide nodes(detail info with IP perticular node and other info)
+kubectl get pod -A -o wide | grep 192.168.110.212    ---------------------to check total pods in perticular node(grep node-ip)
+kubectl get pods -n bcssasoperator -o wide   ------------to see pods inside of particur namespace with wide information
+kubectl api-versions            ---------------------we can check all api versions which one is which api's are using like:apps/v1,networking k8.....etc....
+kubectl api-resorces            ---------------------we can check all api resorces clearly(information)
+kubectl get deploy         ------------------you get what you deployed yet
+kubectl describe deploy deploymentname              -------------you can check all info of deployments
+kubectl top nodes     ---------------------to check nodes space utilization like: CPU(cores)   MEMORY(bytes)  
+kubectl top pods       -------------------to check pods space utilization like: CPU(cores)   MEMORY(bytes)
+kubectl top pods -n (namespace name)    ------------to check perticular namespace pods space utilization like: CPU(cores)   MEMORY(bytes)
+kubectl get nodes --show-labels        ---------------to check labels
+-------------------------------
+Troubleshoot commands
+#kubectl -n default get all  (#kubectl -n namespace get all)         --------------By this you will get all info about perticular node(Like:pods,services,deployments,replicasets...)
+kubectl get pods ------------you will get pods
+Kubectl exe -it podname -- /bin/sh   ---------to check perticular pod by using linux mode(--/bin/sh)
+inside of container we check below commands
+#ls  ---
+#ip a   ----------to check ip address
+#ps aux 
+#cd /proc  -----------generally in process folder will available
+#ls
+1
+10   ----this all are process 
+8
+92
+#cd 1  ---------we can go inside of 1 process
+#cat cmdline
+httpd -DFOREGROUND#  ---------like we can check anything
+exit
+kubectl get pods
+kubectl logs podname   --------to check logs of pod
+kubectl logs appl-7ffcdd-qt788 -----pod name(appl-7....)
+             ------------------- 
+Kubectl describe pod appl-7ffc......   -------------to check all info by using describe command/we can check all events ---like start and status
+kubectl get pvc   ----------we can check volume
+kubectl describe pvc (name)    -----------we can check all events of perticular pvc
+kubectl get pv  ---------you will get all pv's here
+kubectl describe pv (pvc-name)   -------------describe info get here
+kubectl get nodes   -----------------you will get node
+kubectl cordon -h    --------------------- get mark node as unschedulable
+kubectl cordon -foo   ------------------get mark node as unschedulable(if we want to unschedulable node we can use this command)
+kubectl drain -h ------------drain node in preparation for maintance----to push maintaince(if you want to take a node to words to maintance side you can use this command)
+kubectl uncordon -h ---------------mark node as shedulable(like by using cordon-shedule and unshedule)
+kubectl uncordon foo  ----------------------mark node as shedulable(like by using cordon-shedule and unshedule)
+
+
+KUBERNETES DEPLOYMENT COMMANDS AND (LIKE VERSION UPDATED OR YMAL FILE UPDATE OR UNDO YAML FILE for deployment)
+
+kubectl create -f sas-deployment.yaml   -----this is for create a yaml file 
+kubectl apply -f sas-deployment.yaml     ----this is for apply same yaml file (after the create file)
+kubectl get sas-deployment   -----to check all details like  up and running (1/1...something)
+kubectl rollout status sas-deployment.yaml   ----this is to check the status of yaml file rollout 
+kubectl rollout histry sas-deployment.yaml          ------to check histry of rollout file
+kubectl rollout undo sas-deployment.yaml      -----this is for to back old file(rolled back) or prvious which was there in yaml file(it's undo)
+kubectl get all                  ---------------to check all (like pods, service, deployment,replicaset..)
+kubectl explain deployment    -----here you can api which one you want(like app/v1....something)
+kubectl delete pod sas-deployment   --------specific pod deleted
+kubectl get pod   ------after deleting you can check again how many pods are there and status
+kubectl apply -f sas-deployement.yaml ----------if you want to scaleup or scaledown of the pods ( you can change in yaml replicas-5 no' or down replicas-3) by apply command you do
+kubectl get pods  ----here you can see pods terminated or added (you can check total pods aswell)
+kubectl set image deployment/sas-deployement deployment=sas:latest  ------------by using this command we can change image also
+kubectl get deployment   ------to check howmany deployments are there   
+
+
+
+--------------------------------------------------------------------------------------------------------------------------
+Port forwarding command and thery:
+
+kubectl get pods                                                            ----------to check pods(with name and status)
+NAME                                READY   STATUS    RESTARTS   AGE
+hello-kubernetes-7f65c7597f-8dn2l   1/1     Running   0          92s 
+
+kubectl port-forward hello-kubernetes-7f65c7597f-8dn2l 8080:8080                  --------------Port forwarding command
+Forwarding from 127.0.0.1:8080 -> 8080
+Forwarding from [::1]:8080 -> 8080
+Handling connection for 8080
+
+Check in windows
+http://localhost:8080                              ----------------on windows in browser you can check
+
+
+The kubectl port-forward command connects to the Pod with the name hello-kubernetes-7f65c7597f-8dn2l.
+
+And forwards all the traffic from port 8080 on the Pod to port 8080 on your computer.
+If you visit  http://localhost:8080 on your computer, you should be greeted by the application's web page.
+Exposing the application with kubectl port-forward is an excellent way to test the app quickly, but it is not a long-term solution.
+
+
+Ingrress
+----
+ఇన్‌గ్రెస్ కంట్రోలర్ మీ పాడ్‌లకు ట్రాఫిక్‌ను రూట్ చేసే రివర్స్ ప్రాక్సీగా పనిచేస్తుంది.
+
+
+----------------------------------------------------------------------------------------------------------------------
+BITBUCKET COMMANDS
+
+git init          --------initializing git
+git remote add origin git@bitbucket.org:bcstechnology/sas-aws-infrastructure.git  ------first add (establish the connection between bitbucket to local files) laptop files to bitbucket files 
+git status         ---------to check file added on wich branch or master or main etc..
+git add .           ------------adding folder
+git status         ---------again check files added or not for our information
+git commit -m "this is SAS-Recording url links first commit"   -----------commit- comment as per u r understanding
+$ git status    ----------------again check (you will get some information below mentioned)
+On branch master
+nothing to commit, working tree clean
+git remote add bitbucket https://GNAVEEN_KUMAR@bitbucket.org/bcstechnology/sasbcs-test1.git     ---------------this is to establish connection between localrepo(laptop repo) to bitbucket repository
+git push --set-upstream origin master   ------------this is push command to bitbucket
+git push -f origin master     ---------------this is also push command with forcefully
+
+git remote add origin git clone https://GNAVEEN_KUMAR@bitbucket.org/bcstechnology/sas-aws-infrastructure.git    ---------this is from bitbucket clone http link copy and pste it here
+git push -f origin master      ------------pushing 
+---------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------
+NOTE:If already exists files are available in bitbucket(repository) there if you want to add more files in same repository then you can follow below steps
+1)Go to bitbucket and 
+2)go to already created repository location
+3)click on clone hhtps- copy the url
+4)Now you can go to local E drive or on desktop you can create one folder there if you have some file there you can do or create a new folder(and open gitbash here-give a command )
+5)Now you can go to gitbash location and paste the bitbucket clone https URL
+6)In local laptop or drive E laction you will find all the files which is available in bitbucket repository files then do cmd and give a command #code . ( so it will goes to vishual studios)
+7)in visual studio all files will fetched from bitbucket to your local location (or same you will find visual studio also)
+8)In local now you can open that bitbucket repository (folder) and there you can add new files
+9)in vishual studio- open terminal(there you can run commands)
+10)#git init (if reqiured if not you can skip this command)
+11)#ls
+12##git status
+13)#git add .
+14)#git status
+15)#git commit -m "sending file local to bitbucket"
+16)# git push -f origin master              ----------(after this you can go to bitcket and check there you find all files )
+17)Go to bitbucket location and check at repository there you will find files
+-------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------
+
+note:if you want bitbucket data to your local laptop
+1)in bitbucket location copy the which is having file repositor or main master ---copy the http clone link 
+2)first create a folder in your drive or desktop
+3)Then open cmd at same folder location....And paste the clone link here
+4) now check local laptop drive location you will get it
+
+-----------------------------------------------------------------------------------
+GIT
+
+git init    --------------initializing git after intializing by default it will refelect as a master(and in windows also bydefault .git folder or got file create we can observe if we want)
+touch f1    -------create a files
+git add .    -----------adding file
+git status    --------------to check untracked file and staging file and comitted files by using this git status command
+git commite -m "give a any name or information for our understanding in this colan's"           -----------------we can check file commit status at local repository(-m  is nothing but message what do you want you can write it as your senario) 
+git log     --------you can check logs of all commite's (you will get commite id also when commite)
+git log --oneline   ------------here also you will get logs of commite's(with commite id's)
+
+Creating git-Branchs
+git branch naveen    --------creating git branch
+git checkout naveen   ---------switched to branch naveen
+git checkout branchname }    -------------you will get git branching by using this command(ex:git checkout naveen)
+git checkout master     }(both are same command) ------------command is master(git checkout branchname-branchname is a master) 
+git merge branchname   ---------------which is you want to merge branch(all commit's will merge to which banch you want to) it will be merge to master,when merge then new commite id will be generate 
+git log --onleline   -----------check logs all are (commite id's are reflected or not)
+
+git ignoring --   vi .gitignore
+                  *.class          ------this perticular file i want to ignore and any files if you don't want then you can use .ignore command(go to insert mode -i and save   :wq!)  .ignore also consider as a file
+
+git status   ------you can find ignore files
+git add .
+git commit -m "any msg"   -----like ignoring commit for our reference give a message to understand
+
+
+
+
+
+
+
+
+---------------------------------------
+aws eks --region ap-southeast-2 update-kubeconfig --name sas-pra-eks    -------------------to connect eks cluster
+sudo ssh -i bcsjump.ppk clusteruser_bcssas_bcssas-aks@192.168.0.4
+
+
+
+openssl pkcs12 -in test.p12 -out test.crt.pem -clcerts -nokeys
+
+
+
+For cloud watch cammands and deploying the things
+----------------------------------------------------
+
+ aws eks --region ap-southeast-2 update-kubeconfig --name sas-pra-eks ------------------connecting eks cluster
+nano cloudwatch-agent.yml           --------------Created yaml script in one file
+         ---------------------------start yaml script down      
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cloudwatch-agent
+  namespace: amazon-cloudwatch
+
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: cloudwatch-agent-role
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "nodes", "endpoints"]
+    verbs: ["list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["replicasets"]
+    verbs: ["list", "watch"]
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["list", "watch"]
+  - apiGroups: [""]
+    resources: ["nodes/proxy"]
+    verbs: ["get"]
+  - apiGroups: [""]
+    resources: ["nodes/stats", "configmaps", "events"]
+    verbs: ["create"]
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    resourceNames: ["cwagent-clusterleader"]
+    verbs: ["get","update"]
+
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: cloudwatch-agent-role-binding
+subjects:
+  - kind: ServiceAccount
+           --------------------------End yaml script
+kubectl apply -f cloudwatch-agent.yml  --------------serviceaccount/cloudwatch-agent created,clusterrole.rbac.authorization.k8s.io/cloudwatch-agent-role created,clusterrolebinding.rbac.authorization.k8s.io/cloudwatch-agent-role-binding created
+nano cloudwatch-agent-configmap.yml      -------------------
+             ----------------------------start yaml script
+                                                                                                                       
+apiVersion: v1
+data:
+  # Configuration is in Json format. No matter what configure change you make,
+  # please keep the Json blob valid.
+  cwagentconfig.json: |
+    {
+      "logs": {
+        "metrics_collected": {
+          "kubernetes": {
+            "cluster_name": "",
+            "metrics_collection_interval": 60
+          }
+        },
+        "force_flush_interval": 5
+      }
+    }
+kind: ConfigMap
+metadata:
+  name: cwagentconfig
+  namespace: amazon-cloudwatch
+
+
+              ------------------------End yaml script
+
+kubectl apply -f cloudwatch-agent-configmap.yml  -----------configmap/cwagentconfig created
+ wget https://raw.githubusercontent.com/aws-samples/amazon-cloudwatch-container-insights/latest/k8s-deployment-manifest-templates/deployment-mode/daemonset/container-insights-monitoring/cwagent/cwagent-daemonset.yaml  ----------------------
+kubectl apply -f cwagent-daemonset.yaml    ----------------daemonset.apps/cloudwatch-agent created
+wget https://raw.githubusercontent.com/aws-samples/amazon-cloudwatch-container-insights/latest/k8s-deployment-manifest-templates/deployment-mode/daemonset/container-insights-monitoring/fluent-bit/fluent-bit.yaml  -----------------------
+kubectl apply -f fluent-bit.yaml      ----------------------serviceaccount/fluent-bit created,clusterrole.rbac.authorization.k8s.io/fluent-bit-role unchanged,clusterrolebinding.rbac.authorization.k8s.io/fluent-bit-role-binding unchanged,configmap/fluent-bit-config created,daemonset.apps/fluent-bit created 
+kubectl get all -n amazon-cloudwatch  ----------------all pods will get perticular amazon-cloudwatch
+kubectl create ns amazon-cloudwatch    --------------------Name space create----namespace/amazon-cloudwatch created
+ create cwagent service account and role binding   ------------------
+
+
+sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport fs-73607d4b.efs.ap-southeast-2.amazonaws.com:/ efs
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+bcs123@BCSIN-LPA-0095:~/viya4-monitoring-kubernetes$ kubectl get svc -n ingress-nginx
+NAME                                              TYPE           CLUSTER-IP      EXTERNAL-IP                                                                   PORT(S)                      AGE
+nginxingress-ingress-nginx-controller             LoadBalancer   10.100.68.41    a434baa6cb1c044d6a10734074bff88c-402307127.ap-southeast-2.elb.amazonaws.com   80:30060/TCP,443:32392/TCP   22d
+nginxingress-ingress-nginx-controller-admission   ClusterIP      10.100.97.227   <none>                                                                        443/TCP                      22d
+
+
+
+LDAP setup commands
+---------------------------------
+less users.ldif
+
+
+
+kibana(ELK) commands
+--------------------------------
+./logging/bin/deploy_logging_open.sh
+
+
+
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------------
+Port forwarding
+kubectl port-forward svc/v4m-es-kibana-svc 8000:443 -n logging
+
+C:\Users\GET IT RENT>kubectl port-forward svc/v4m-es-kibana-svc 8000:30156
+Error from server (NotFound): services "v4m-es-kibana-svc" not found
+
+C:\Users\GET IT RENT>kubectl port-forward svc/v4m-es-kibana-svc 8000:30156 -n logging
+error: Service v4m-es-kibana-svc does not have a service port 30156
+
+C:\Users\GET IT RENT>kubectl port-forward svc/ 8000:443 -n logging
+Forwarding from 127.0.0.1:8000 -> 5601
+Forwarding from [::1]:8000 -> 5601                                                               (kibana port no:5601)
+Handling connection for 8000
+Handling connection for 8000
+Handling connection for 8000
+--------------------------------------------------------------------------------------
+kubectl port-forward svc/v4m-es-kibana-svc 8000:443 -n logging      ---to run port-forwarding for kibana
+
+http://localhost:8000/app/kibana#/management/kibana/index_pattern?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))      ------------kibana URL
+kibana_username: kibanaserver
+kibana_password: MzM4NWNjMWM0MmYzNjYxZDZmYTM5NTg0
+---------------------------------------------------------
+kubectl port-forward svc/v4m-grafana 8080:80 -n monitoring          ----to run port-forwarding for grafana 
+
+http://localhost:8080/d/0qo7Sq9Zz/kubernetes-cluster?orgId=1&refresh=5s&from=now-5m&to=now    ---------Grafana-URL   
+grafana_username: admin
+grafana_password: MDc4ZDNkMjM2NGQ5MjE4OGE0Y2ZiMDQ0
+
+-------------------------------------------------------------------------------------------------------------------
+
+logging/bin/change_internal_password.sh admin sasviya
+
+kibanaserver
+ZjE3NjE0ZTk5MDQ1Mzk4MjZkNTI4ZGZi
+
+
+sudo mount -t efs fs-73607d4b nfs/ 
+
+/home/jumpuser/nfs/migration 
+
+
+nfs availbel-mount compute server
+
+
+/access-clients
+jumpuser@pragroup:~/nfs/access-clients$ mv odbcinst.sample.ini odbcinst.ini
+jumpuser@pragroup:~/nfs/access-clients$ ls -lt
+total 12
+-rwxrwxr-x 1 jumpuser jumpuser 1415 Dec  2 10:05 odbcinst.ini
+-rw-rw-r-- 1 jumpuser jumpuser 6339 Dec  2 09:01 odbc.ini
+jumpuser@pragroup:~/nfs/access-clients$ ^C
+jumpuser@pragroup:~/nfs/access-clients$
+
+
+ODBCHOME=/access-clients/odbc
+ODBCINI=/access-clients/odbc/odbc.ini
+ODBCINST=/access-clients/odbc/odbcinst.ini
+```
+-----------------------------------------------------------------------
+ssh -J username@nfs-server-ip     -------------remote connecting
+
+ssh -J jumpuser@192.168.13.84      ------- remote connecting with another ip
+
+cat ~/.kube/config
+
+---------------------------------------------------------
+#az aks get-credentials --resource-group bcssas --name bcssas-aks        --------azure lens or to connect aks cluster 
+
+or
+
+#az aks get-credentials --resource-group bcs-kubernetes --name bcs-aks --admin           --------------------basically you will get this command when you will be try to connect at portal end you  get this is cluster login in your local or connect the cluster
+ (az aks get-credentials --resource-group (resource-groupname) --name (cluster-name) --admin
+
+------------------------------------------------------------------------------------------------------------------------------
+#nslookup google.com     ----------------(nslookup any .com---you will get ip address of that dns name)
+#nslookup wipro.com
+
+
+
+----------------------------
+  Tomcat      ------8080
+  jenkins     ------8080
+  nginx         ----80
+
+
+
+
+
+
+
+1000000000000
+900000000000
+
+ helm install elasticsearch-demo elastic/elasticsearch -f elasticsearch-values.yaml -n cluster-monitoring
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+AKS Interview quetion and answers:
+
+The AKS (Azure Kubernetes Service) is a fully managed service for deploying, scaling, and managing containerized applications on Azure. Here are some common interview questions and answers related to AKS:
+
+What is AKS?
+AKS is a fully managed Kubernetes service on Azure that allows users to deploy, scale, and manage containerized applications.
+What are the benefits of using AKS?
+Some benefits of using AKS include automatic scaling, self-healing, automatic upgrades, and integration with other Azure services.
+How does AKS differ from other Kubernetes services?
+AKS is a fully managed service, which means that Azure handles the management and maintenance of the Kubernetes control plane and nodes. This allows users to focus on building and deploying their applications.
+How can I deploy an application to AKS?
+Applications can be deployed to AKS using Kubernetes manifests, Helm charts, or Azure DevOps.
+How can I scale my application on AKS?
+Applications can be scaled on AKS by adjusting the number of replicas in the Kubernetes deployment or by using Azure Autoscale.
+How can I update my application on AKS?
+Applications can be updated on AKS by using a rolling update strategy, where new replicas are created and old replicas are removed, or by using a blue/green deployment strategy, where a new version of the application is deployed alongside the old version and traffic is gradually shifted to the new version.
+How can I monitor my application on AKS?
+Applications can be monitored on AKS by using Azure Monitor for containers, which provides metrics and logs for the Kubernetes cluster and pods.
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------
+
+Kubernetes question and answers
+Kubernetes is an open-source container orchestration system for automating the deployment, scaling, and management of containerized applications. Here are some common interview questions and answers related to Kubernetes:
+
+What is Kubernetes?
+Kubernetes is an open-source container orchestration system for automating the deployment, scaling, and management of containerized applications.
+What are the key features of Kubernetes?
+Some key features of Kubernetes include automatic scaling, self-healing, automatic rollouts and rollbacks, service discovery and load balancing, and storage orchestration.
+How does Kubernetes handle container scaling?
+Kubernetes handles container scaling by using a Replication Controller or a Deployment. These objects ensure that a specified number of replicas of a pod are running at any given time. Scaling can be done by increasing or decreasing the number of replicas.
+What is a pod in Kubernetes?
+A pod is the smallest and simplest unit in the Kubernetes object model. It represents a single container or a group of tightly coupled containers that should be deployed together.
+How do services work in Kubernetes?
+Services in Kubernetes provide a stable endpoint for pods, which can be used to access the pods. Services also handle load balancing and service discovery between pods.
+What is a deployment in Kubernetes?
+A deployment in Kubernetes is an object that describes a desired state for a group of pods. It ensures that the specified number of replicas of a pod are running at any given time, and it can be used to update or rollback the pod.
+How does Kubernetes handle storage?
+Kubernetes uses a concept called volumes to handle storage. Volumes are used to persist data in a pod, and they can be backed by a variety of storage options such as local storage, network-attached storage, or cloud-based storage.
+What is a Kubernetes cluster?
+A Kubernetes cluster is a set of machines, called nodes, that run containerized applications managed by Kubernetes. The cluster has a master node that runs the Kubernetes control plane and worker nodes that run the applications.
+
+--------------------------------------------------------------------------------------------------------
+Note: In pod  spec location- app:2048  should be match at service of nodeport -selector:app:2048  
+
+
+
+  
+
+
+

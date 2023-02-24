@@ -1,0 +1,81 @@
+Terraform:
+terraform docs link:https://registry.terraform.io/providers/hashicorp/aws/latest/docs#authentication-and-configuration
+
+Pre-required things to proceed for Terraform:
+-install terraform-windows one
+-VS CODE installation
+-setup environment vairable path(after install the terraform)
+
+----------------------------------------------------------------------------------
+STEP BY STEP:
+
+-download terraform from google
+-select windows-64bit(and download this terraform.exe file in your local)
+-you can extract your location
+-then you can check Terraform installed or not at CMD location run with command like-terrafom(so you will all info of terraform-means it's installed)
+-Actually you have to setup environment vairable path
+-search in your local laptop -environment vairable
+1)click on path ,and next click new
+2)go to your original location of terraform area at your local laptop copy the path(Like:c/downloads/terraform.....something)
+3)paste the copied path at environment vairable location
+4)click on -ok, ok ok(like close all windows of envi...vaira..)
+-now run again command at cmd location-like:terraform (you will get all info of terraform,)
+-Now you can create new Terraform folder at your local anywhere(like:c drive,d drive....something)
+-You need a VS CODE(visual studio code)-first you need to install this vs code at your local laptop
+-after installing VS CODE you should browse above terraform folder or you can create file at vs code location
+-or go to your local Terraform folder location do CMD and type code .  (it will take you automatically vscode location)
+-And now you can go to terraform registry for collecting terraform scripts(which cloud you want you can select at documentation location and take a code as per your requirement)
+
+
+-----Step1:Fisrt you can select a Authentication and configuration-in terraform docs(there you will get script of basic one)
+Like: 
+
+ provider "aws" {
+  region     = "us-west-2"
+  access_key = "my-access-key"
+  secret_key = "my-secret-key"
+} 
+
+Note:above you should mentioned access key and secret key with region this you will get from aws console
+
+Step 3:if you want EC2-resource you can create ec2 with mentioned sample script below 
+
+
+resource "aws_instance" "this" {
+  ami                     = "ami-0dcc1e21636832c5d"
+  instance_type           = "m5.large"
+  host_resource_group_arn = "arn:aws:resource-groups:us-west-2:012345678901:group/win-testhost"
+  tenancy                 = "host"
+}
+
+Note:above you need ami id this you will get from aws console and you decide wich size etc.....
+
+
+-Provider block is help you to authenticate aws account
+-Resource block will help to create a infrastracture
+
+
+--------------
+Now you can go to where the .tf(naveen.tf) file is available there do cmd then run the commands of terraform
+-#terraform init    -------by this command all terraform related plugins will be downloaded and by this command in your local where .tf file was there at same location one more file will be generated that is .terraform folder and one hcl file
+ 
+#terraform plan         --------by this command it will tell what terraform planing to create
+
+#terraform plan     ---------by this command it will create infra(meanwhlie executing this command it will ask you yes or no)
+
+#terraform apply    ---------by this command you infra will created which is you mentioned in .tf file
+
+#terraform destroy  ---------by this command you can destroyed your infra
+
+#terraform destroy -target aws_instance.naveenec2 (#terraform destroy -target resource mentionednameininfra)     ----------by this command you target particular service (or resource) you can destroy without desturbing running present infra
+
+Note:once you destroyed infra -again if you want to back same infra (rerun same) you can run tha apply command(#terrafaorm apply) so you will get back same infra
+Note:If you don't want particular resource you can comment out by using this /* resource ec2_instance */ (/* */)giving this symbols you can skip particular resource (After giving symbals, if you can run command  #terraform plan    ----you will info of which you commeted specific resource it will be destroy, shows you or give a info)
+
+
+STATEFILE:
+--------------------------
+-terraform stores the information of the real infrastructure which is created by using state file
+-terraform tracks the infrastructure using the state file
+
+Note:not recomented to edit state file(.tfstate) because all information is available(running infrastructure information is available so don't edit the sate file)

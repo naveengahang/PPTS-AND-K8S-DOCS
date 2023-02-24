@@ -1,0 +1,17 @@
+-Install git in your pc (And find where it was there like exp:c/users/programfiles/git/bin/exe.)
+-create a source code file in your local computer(with some script it may be simple or any script-like java,python...etc any)
+-at local file location do git bash by right clicking you will find gitbash here option open it (git bash will opened)
+-write a commands like #git init
+#git add . 
+#git commit -m "my first commint"
+-After above commands go to github location and create a git repository(by using create option giving some name)
+-same location you can copy that url(like https://github.com/reponame/gitjenkinsfile.git.....something link)
+- paste that above url at git bash location by using below command so it will add file local to github location
+#git remote add origin https://github.com/reponame/gitjenkinsfile.git (add lastly .git)
+-After adding github location same file will be push to repository(it may be master or main branch)
+#git push -u origin master    (you can check file is added in github location which is local file is added or not)
+
+
+  
+ 
+- 
